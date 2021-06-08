@@ -15,13 +15,13 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
   }
   
   const emailResponse: any = await email.sendEmail(emailBody)
+  //TODO: HANDLING ERRORS
+
   console.info('Email Response:', emailResponse)
 
   ctx.status = 200//responseStatus
   ctx.body = { "Email sended": emailResponse }
   
-  //data
-  //ctx.set('Cache-Control', headers['cache-control'])
   console.log("FIN SENDEMAIL")
   await next()
 }

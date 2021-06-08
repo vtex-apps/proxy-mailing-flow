@@ -15,6 +15,8 @@ export async function getOrder(ctx: Context, next: () => Promise<any>) {
     //console.log("TOKEN", ctx.vtex.authToken)
   
     const orderResponse: any = await orders.order(body.OrderId)
+    //TODO: HANDLING ERRORS
+    
     console.log({orderResponse})
     ctx.state.orderResponse = orderResponse
 
@@ -22,7 +24,7 @@ export async function getOrder(ctx: Context, next: () => Promise<any>) {
     await next()
   }
   
-  /*
+  /* GET ORDERS HECHO CUSTOM CON EXTERNAL CLIENT
   const body = await json(ctx.req)
   console.log("BODY", body)
   console.log("STATE", body.State)

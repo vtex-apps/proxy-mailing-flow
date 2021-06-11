@@ -19,7 +19,7 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
   console.info('Email Response:', emailResponse)
 
   ctx.status = 200//responseStatus
-  ctx.body = { "Email sended": emailResponse }
+  ctx.body = { "response": "Email sent " + emailResponse }
   
   console.log("FIN SENDEMAIL")
   await next()

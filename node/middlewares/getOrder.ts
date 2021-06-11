@@ -31,6 +31,8 @@ export async function getOrder(ctx: Context, next: () => Promise<any>) {
       console.log("FIN GETORDER")
       await next()
     } else {
+      ctx.status = 200
+      ctx.body = { "response" : "no email" }   
       return
     }
   }

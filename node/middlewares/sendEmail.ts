@@ -1,10 +1,9 @@
-export async function sendEmail(ctx: Context, next: () => Promise<any>) {
-  
+export async function sendEmail(ctx: Context, next: () => Promise<any>) { 
   const {
     state: { orderResponse },
     clients: { email },
   } = ctx
-
+  
   const emailBody = {
     "providerName": "noreply",
     "templateName": "proxymailingoms-pedido-recibido",

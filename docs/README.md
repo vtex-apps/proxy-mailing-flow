@@ -12,10 +12,9 @@ This service allows you to handling the mailing to be able to cancel and generat
 >     {
 >       "filter": {
 >         "type": "FromWorkflow",
->         "status": ["order-created","order-completed", "handling", "ready-for-handling", "waiting-ffmt-authorization", "cancel"],
->         "disableSingleFire": false
+>         "status": ["order-created"]
 >       },
 >       "hook": {
->         "url": "https://{{accountName}}.myvtex.com/_v/status/"
+>         "url": "https://{{accountName}}.myvtex.com/_v/proxy-mailing-flow/1"
 >       }
 >     }

@@ -4,6 +4,8 @@ import { LRUCache, method, Service } from '@vtex/api'
 import { Clients } from './clients'
 import { sendEmail } from './middlewares/sendEmail'
 import { getOrder } from './middlewares/getOrder'
+import { pong } from './middlewares/pong'
+
 
 const TIMEOUT_MS = 800
 
@@ -40,12 +42,27 @@ declare global {
   interface OrderResponseInterface {
     orderId: string,
     clientProfileData: ClientProfileDataInterface,
+    customData: CustomDataInterface
+  }
+  interface BodyInterface {
+    State: string,
+    OrderId: string,
+    hookConfig: string
+  }
+
+  interface CustomDataInterface {
+    customApps: [CustomFieldInterface]
+  }
+
+  interface CustomFieldInterface {
+    id: string
   }
   
   // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
   interface State extends RecorderState {
     code: number,
-    orderResponse: OrderResponseInterface
+    orderResponse: OrderResponseInterface,
+    body: BodyInterface
   }
 }
 
@@ -55,7 +72,7 @@ export default new Service({
   routes: {
     // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
     status: method({
-      POST: [getOrder, sendEmail],//1er: hacer un get order con el orderId, 2do: agarrar la info del 1ro y armar el body para pegarle a la api de mailing.
+      POST: [pong, getOrder, sendEmail],//1er: hacer un get order con el orderId, 2do: agarrar la info del 1ro y armar el body para pegarle a la api de mailing.
     }),
   },
 })

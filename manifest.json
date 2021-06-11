@@ -1,7 +1,7 @@
 {
   "name": "proxy-mailing-flow",
   "vendor": "vtexarg",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "title": "Proxy mailing Flow",
   "description": "Proxy that handle the mailing flow",
   "categories": [],
@@ -9,6 +9,12 @@
   "builders": {
     "node": "6.x",
     "docs": "0.x"
+  },
+  "billingOptions": {
+    "type": "free",
+    "availableCountries": [
+      "*"
+    ]
   },
   "scripts": {
     "prereleasy": "bash lint.sh"

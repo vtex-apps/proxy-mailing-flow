@@ -1,9 +1,9 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
-export default class Order extends ExternalClient {
+export default class Masterdata extends ExternalClient {
   constructor(context: IOContext, options?: InstanceOptions) {
-    super(`https://${context.account}.vtexcommercestable.com.br/api/oms/pvt/orders/`, context, {
+    super(`http://${context.account}.vtexcommercestable.com.br/api/dataentities/CL/search`, context, {
     ...options,
       headers: {
         VtexIdClientAutCookie: context.authToken,
@@ -12,7 +12,7 @@ export default class Order extends ExternalClient {
     })
   }
 
-  public async getOrder(orderId: any): Promise<string> {
-    return this.http.get(`/${orderId}`)
+  public async getClientData(customerClass: string): Promise<string> {
+    return this.http.get(`?customerClass=${customerClass}&agente=VE`)
   }
 }

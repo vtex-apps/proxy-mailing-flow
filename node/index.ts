@@ -4,6 +4,7 @@ import { LRUCache, method, Service } from '@vtex/api'
 import { Clients } from './clients'
 import { sendEmail } from './middlewares/sendEmail'
 import { getOrder } from './middlewares/getOrder'
+import { getClientData } from './middlewares/getClientData'
 import { pong } from './middlewares/pong'
 
 
@@ -37,7 +38,8 @@ declare global {
   type Context = ServiceContext<Clients, State>
 
   interface ClientProfileDataInterface {
-    email: string
+    email: string,
+    customerClass: string
   }
   interface OrderResponseInterface {
     orderId: string,
@@ -62,7 +64,9 @@ declare global {
   interface State extends RecorderState {
     code: number,
     orderResponse: OrderResponseInterface,
-    body: BodyInterface
+    body: BodyInterface,
+    emails: {clientEmail: string, sellerEmail: string},
+    flow: string
   }
 }
 
@@ -72,7 +76,7 @@ export default new Service({
   routes: {
     // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
     status: method({
-      POST: [pong, getOrder, sendEmail],//1er: hacer un get order con el orderId, 2do: agarrar la info del 1ro y armar el body para pegarle a la api de mailing.
+      POST: [pong, getOrder, getClientData,sendEmail],//1er: hacer un get order con el orderId, 2do: agarrar la info del 1ro y armar el body para pegarle a la api de mailing.
     }),
   },
 })

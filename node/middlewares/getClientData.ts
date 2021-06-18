@@ -6,7 +6,7 @@ export async function getClientData(ctx: Context, next: () => Promise<any>) {
   console.log("FLOW CLIENT DATA")
   console.log(ctx.state.flow)
   const customerClass = orderResponse.clientProfileData.customerClass
-  const clientDataResponse: any = await masterdataclient.getClientData(customerClass)
+  const clientDataResponse: any = await masterdataclient.getClientData(customerClass).catch(err => console.error(err))
   console.log('--------------------------GET CLIENT DATA-----------------------------')
   console.log({clientDataResponse})
   const emails = {

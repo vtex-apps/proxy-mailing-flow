@@ -38,15 +38,31 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
 
   if(flow === "Invoiced"){
     console.log(ctx.state.flow)
-    //TODO: Cambiar templates por las que correspondan
     const templateInvoicedClient = "proxymailingoms-pedido-facturado"
     const templateInvoicedSeller = "proxymailingoms-pedido-facturado-vendedor"
+    
+    
+    // 1 ---------------------------------------------------------------------------------------
+    console.log("EMAIL DEL COMERCIANTE 1-------------",orderResponse.clientProfileData.email)
+    
+    // 2 ---------------------------------------------------------------------------------------
+    const clientProfileDataSeller = {...orderResponse.clientProfileData}
+    const orderResponseSeller = {...orderResponse}
+    clientProfileDataSeller.email = emails.sellerEmail 
+    orderResponseSeller.clientProfileData = clientProfileDataSeller
+  
+    // 3 ---------------------------------------------------------------------------------------
+    console.log("EMAIL DEL COMERCIANTE 3-------------",orderResponse.clientProfileData.email)
 
     const emailBodyClient = new EmailBodyInvoiced("noreply", templateInvoicedClient,  orderResponse)
-    const emailBodySeller = new EmailBodyInvoiced("noreply", templateInvoicedSeller, orderResponse)
+    const emailBodySeller = new EmailBodyInvoiced("noreply", templateInvoicedSeller, orderResponseSeller)
     
-    emailBodySeller.jsonData.clientProfileData.email = emails.sellerEmail
-
+    //TODO: VERIFICAR SI LOS MAILS SON CORRECTOS
+    console.log("CPD CLIENT---------------------------",emailBodyClient.jsonData.clientProfileData)
+    console.log("CPD SELLER---------------------------",emailBodySeller.jsonData.clientProfileData)
+    
+    console.log("SEND EMAIL SELLER TO:",emailBodySeller.jsonData.clientProfileData.email)
+    console.log("SEND EMAIL CLIENT TO:",emailBodyClient.jsonData.clientProfileData.email)
     const emailResponseClient: any = await email.sendEmail(emailBodyClient)
     const emailResponseSeller: any = await email.sendEmail(emailBodySeller)
 

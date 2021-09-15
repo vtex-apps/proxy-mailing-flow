@@ -1,51 +1,65 @@
-export async function getOrder(ctx: Context, next: () => Promise<any>) { 
+export async function getOrder(ctx: Context, next: () => Promise<any>) {
   const {
     state: { body },
-    clients: { orders }
+    clients: { orders },
   } = ctx
 
   ctx.state.flow = "GetOrderInit"
-  console.log("FLOW")
-  console.log(ctx.state.flow)
-  console.log("BODY", body)
-  console.log("STATE", body.State)
-  console.log("ORDERID", body.OrderId)
-  console.log("Es order-created?", body.State === "order-created")
-  console.log("Es invoiced?", body.State === "invoiced")
+  console.log('getOrder A')
+  try {
+    if (body.State === "order-created") {
+      console.log('getOrder A')
+      ctx.state.flow = "OrderCreated"
 
-  if (body.State === "order-created"){
-    ctx.state.flow = "OrderCreated"
-    console.log("FLOW")
-    console.log(ctx.state.flow)
-    const orderResponse: any = await orders.order(body.OrderId)
+      const orderResponse: any = await orders.getOrder(body.OrderId)
+      ctx.state.orderResponse = orderResponse.data
 
-    const custom = orderResponse.customData.customApps.find((e: any) => e.id === "origin")
+      if (!orderResponse.data.customData) {
+        ctx.state.flow = "OrderCreatedWithoutOrigin"
+        console.log("CPD en GET ORDER", orderResponse.data.clientProfileData)
+        ctx.state.orderResponse = orderResponse.data
+        await next()
 
-    const envioMail = custom ? false : true
-    
-    if(envioMail){
-      ctx.state.flow = "OrderCreatedWithoutOrigin"
-      console.log("FLOW")
-      console.log(ctx.state.flow)
-      ctx.state.orderResponse = orderResponse
+      } else {
+        const custom = orderResponse.data.customData.customApps.find((e: any) => e.id === "origin")
+
+        const envioMail = custom ? false : true
+
+        if (envioMail) {
+          console.log("CPD en GET ORDER", orderResponse.data.clientProfileData)
+
+          ctx.state.flow = "OrderCreatedWithoutOrigin"
+          console.log("FLOW")
+          console.log(ctx.state.flow)
+          ctx.state.orderResponse = orderResponse.data
+          await next()
+        } else {
+          ctx.state.flow = "OrderCreatedWithOrigin"
+          console.log("FLOW")
+          console.log(ctx.state.flow)
+          ctx.status = 200
+          ctx.body = { "response": "no email" }
+          return
+        }
+      }
+    } else if (body.State === "invoiced") {
+      console.log('getOrder B')
+      ctx.state.flow = "Invoiced"
+
+      const orderResponse: any = await orders.getOrder(body.OrderId)
+
+      ctx.state.orderResponse = orderResponse.data
+
       await next()
     } else {
-      ctx.state.flow = "OrderCreatedWithOrigin"
-      console.log("FLOW")
-      console.log(ctx.state.flow)
-      ctx.status = 200
-      ctx.body = { "response" : "no email" }   
+      console.log('getOrder C')
       return
     }
-  } else if (body.State === "invoiced"){
-    ctx.state.flow = "Invoiced"
-    console.log("FLOW")
-    console.log(ctx.state.flow)
-    const orderResponse: any = await orders.order(body.OrderId)
+  } catch (err) {
+    console.error(err)
+    ctx.status = 500
+    ctx.body = { "message": err }
 
-    ctx.state.orderResponse = orderResponse
     await next()
-  } else {
-    return
   }
 }

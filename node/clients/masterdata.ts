@@ -12,7 +12,8 @@ export default class Masterdata extends ExternalClient {
     })
   }
 
-  public async getClientData(customerClass: string): Promise<string> {
-    return this.http.get(`?customerClass=${customerClass}&agente=VE`)
+  public async getClientData(customerClass: string, agente: string){
+    console.log('MASTERDATA QUERY', `?customerClass=${customerClass}&agente=${agente}`)
+    return this.http.get(`?customerClass=${customerClass}&agente=${agente}`)
   }
 }

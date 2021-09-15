@@ -15,6 +15,6 @@ This service allows you to handling the mailing to be able to cancel and generat
 >         "status": ["order-created", "invoiced"]
 >       },
 >       "hook": {
->         "url": "https://{{accountName}}.myvtex.com/_v/proxy-mailing-flow/1"
+>         "url": "https://{{accountName}}.myvtex.com/_v/proxy-mailing-flow/"
 >       }
 >     }

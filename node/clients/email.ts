@@ -11,7 +11,11 @@ export default class Email extends ExternalClient {
     })
   }
 
-  public async sendEmail(body: any): Promise<string> {
-    return this.http.post("", body)
+  public async sendEmail(body: any) {
+    const aux = await this.http.postRaw("", body)
+    const email = body.jsonData.to? body.jsonData.to : body.jsonData.clientProfileData.email
+    const type = body.jsonData.to? "order-created" : "invoiced"
+    console.log("SEND EMAIL", type, email, aux.status)
+    return aux
   }
 }

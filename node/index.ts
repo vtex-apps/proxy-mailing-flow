@@ -62,10 +62,9 @@ declare global {
   
   // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
   interface State extends RecorderState {
-    code: number,
     orderResponse: OrderResponseInterface,
     body: BodyInterface,
-    emails: {clientEmail: string, sellerEmail: string},
+    emails: {clientEmail: string, subsEmails: string[]},
     flow: string
   }
 }
@@ -76,7 +75,7 @@ export default new Service({
   routes: {
     // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
     status: method({
-      POST: [pong, getOrder, getClientData,sendEmail],//1er: hacer un get order con el orderId, 2do: agarrar la info del 1ro y armar el body para pegarle a la api de mailing.
+      POST: [pong, getOrder, getClientData, sendEmail],//1er: hacer un get order con el orderId, 2do: agarrar la info del 1ro y armar el body para pegarle a la api de mailing.
     }),
   },
 })

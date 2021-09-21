@@ -39,15 +39,13 @@ export async function getOrder(ctx: Context, next: () => Promise<any>) {
           return
         }
       }
-    } else if (body.State === 'invoiced') {
+    } else {
       ctx.state.flow = 'Invoiced'
       const orderResponse: any = await orders.getOrder(body.OrderId)
 
       ctx.state.orderResponse = orderResponse.data
 
       await next()
-    } else {
-      return
     }
   } catch (err) {
     ctx.status = 500

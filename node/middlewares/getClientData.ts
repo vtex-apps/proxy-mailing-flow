@@ -1,3 +1,6 @@
+import { LogLevel } from '@vtex/api'
+import { ClientData } from '../clients/masterdata'
+
 export async function getClientData(ctx: Context, next: () => Promise<any>) {
   const {
     state: { orderResponse },
@@ -11,15 +14,12 @@ export async function getClientData(ctx: Context, next: () => Promise<any>) {
     const subscriberEntityListParsed = subscriberEntityList.split(',')
     const { customerClass } = orderResponse.clientProfileData
 
-    const subscribers: any = await Promise.all(
-      subscriberEntityListParsed.map((sub: string) =>
-        masterdataclient.getClientData(customerClass, sub)
-      )
-    )
-    // console.log('getClientData')
+    const subscriberPromises: Promise<ClientData>[] = subscriberEntityListParsed.map((sub: string) => masterdataclient.getClientData(customerClass, sub))
+
+    const subscribers: ClientData[] = await Promise.all(subscriberPromises)
 
     const subscriberEmails = subscribers
-      .map((sub: any) => sub.map((user: any) => user.email))
+      .map((sub: ClientData) => sub.map((user: ClientData) => user.email))
       .flat()
 
     const emails = {
@@ -29,9 +29,26 @@ export async function getClientData(ctx: Context, next: () => Promise<any>) {
 
     ctx.state.emails = emails
 
+    ctx.vtex.logger.log({
+      message: 'getClientData Info',
+      detail: {
+        appId: appId,
+        settings: settings,
+        customerClass: customerClass,
+        emails: emails
+      }
+    },LogLevel.Info)
+
     await next()
   } catch (err) {
-    console.error(err)
+    ctx.vtex.logger.log({
+      message: 'getClientData Error',
+      detail: {
+        errorMessage: err.message,
+        error: err
+      }
+    },LogLevel.Error)
+
     ctx.status = 500
     ctx.body = { error: 'Error sending email', message: err }
 

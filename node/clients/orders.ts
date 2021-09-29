@@ -1,4 +1,4 @@
-import type { InstanceOptions, IOContext } from '@vtex/api'
+import type { InstanceOptions, IOContext, IOResponse } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 export default class OrdersClient extends ExternalClient {
@@ -16,7 +16,7 @@ export default class OrdersClient extends ExternalClient {
     )
   }
 
-  public async getOrder(orderId: string) {
+  public async getOrder(orderId: string): Promise<IOResponse<String>> {
     return this.http.getRaw(`${orderId}`)
   }
 }

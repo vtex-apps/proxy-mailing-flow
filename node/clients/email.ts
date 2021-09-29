@@ -1,4 +1,4 @@
-import type { InstanceOptions, IOContext } from '@vtex/api'
+import type { InstanceOptions, IOContext, IOResponse } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 export default class Email extends ExternalClient {
@@ -15,7 +15,21 @@ export default class Email extends ExternalClient {
     )
   }
 
-  public async sendEmail(body: any) {
+  public async sendEmail(body: BodyEmail): Promise<IOResponse<String>> {
     return this.http.postRaw('', body)
+  }
+}
+
+export interface BodyEmail {
+  providerName: string
+  templateName: string
+  jsonData: JsonData
+}
+
+export interface JsonData {
+  to?: string
+  orders?: unknown[]
+  clientProfileData?: {
+    email?: string
   }
 }

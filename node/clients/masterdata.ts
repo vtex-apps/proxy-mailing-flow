@@ -1,4 +1,4 @@
-import type { InstanceOptions, IOContext } from '@vtex/api'
+import type { InstanceOptions, IOContext, IOResponse} from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 export default class Masterdata extends ExternalClient {
@@ -16,7 +16,11 @@ export default class Masterdata extends ExternalClient {
     )
   }
 
-  public async getClientData(customerClass: string, agente: string) {
+  public async getClientData(customerClass: string, agente: string): Promise<ClientData[]> {
     return this.http.get(`?customerClass=${customerClass}&agente=${agente}`)
   }
+}
+
+export interface ClientData {
+  email: string
 }

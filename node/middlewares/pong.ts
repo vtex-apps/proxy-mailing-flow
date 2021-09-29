@@ -1,4 +1,5 @@
 import { json } from 'co-body'
+import { LogLevel } from '@vtex/api'
 
 export async function pong(ctx: Context, next: () => Promise<any>) {
   const body = await json(ctx.req)
@@ -6,7 +7,18 @@ export async function pong(ctx: Context, next: () => Promise<any>) {
   ctx.state.body = body
   ctx.state.flow = 'Init'
 
+  ctx.vtex.logger.log({
+    message: 'Init',
+    detail: {
+      receivedBody: body
+    }
+  },LogLevel.Info)
+
   if (body.hookConfig) {
+    ctx.vtex.logger.log({
+      message: 'Ping received'
+    },LogLevel.Info)
+
     ctx.state.flow = 'Pong'
     ctx.status = 200
     ctx.body = { response: 'pong' }

@@ -1,3 +1,6 @@
+import { LogLevel, IOResponse } from '@vtex/api'
+import { BodyEmail, JsonData } from '../clients/email'
+
 export async function sendEmail(ctx: Context, next: () => Promise<any>) {
   const {
     state: { orderResponse, emails, flow },
@@ -8,7 +11,7 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
     const emailBodyBuilder = (
       providerName: string,
       templateName: string,
-      jsonData: JsonDataInvoiced | JsonDataCreated
+      jsonData: JsonData
     ) => {
       return {
         providerName,
@@ -27,7 +30,7 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
 
     const subscribers = emails.subsEmails
 
-    let emailBodyClient
+    let emailBodyClient: BodyEmail
 
     if (flow === 'Invoiced') {
       emailBodyClient = emailBodyBuilder(
@@ -42,7 +45,7 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
       })
     }
 
-    const emailBodySubscribersList = subscribers.map((sub: string) => {
+    const emailBodySubscribersList: BodyEmail[] = subscribers.map((sub: string) => {
       if (flow === 'Invoiced') {
         const clientProfileDataSub = { ...orderResponse.clientProfileData }
         const orderResponseSub = { ...orderResponse }
@@ -63,24 +66,24 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
       })
     })
 
-    const emailResponseClient: any = await email.sendEmail(emailBodyClient)
+    const emailResponseClient: IOResponse<String> = await email.sendEmail(emailBodyClient)
 
-    const emailResponseSeller: any = await Promise.all(
-      emailBodySubscribersList.map(async (body: any) => {
+    const emailResponseSubs: EmailResponseSubs[] = await Promise.all(
+      emailBodySubscribersList.map(async (body: BodyEmail) => {
         const aux = await email.sendEmail(body)
 
         if (flow === 'Invoiced') {
           return {
             status: aux.status,
             data: aux.data,
-            email: body.jsonData.clientProfileData.email,
+            email: body?.jsonData?.clientProfileData?.email,
           }
         }
 
         return {
           status: aux.status,
           data: aux.data,
-          email: body.jsonData.to,
+          email: body?.jsonData?.to,
         }
       })
     )
@@ -88,7 +91,7 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
     const response = {
       orderId: orderResponse.orderId,
       response: [
-        ...emailResponseSeller,
+        ...emailResponseSubs,
         {
           status: emailResponseClient.status,
           data: emailResponseClient.data,
@@ -97,8 +100,12 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
       ],
     }
 
-    // console.log("EMAILS SEND EMAIL", emails.clientEmail, emails.subsEmails )
-    // console.log("RESPONSE invoiced", response.orderId, response.response)
+    ctx.vtex.logger.log({
+      message: 'sendEmail Info',
+      detail: {
+        response: response
+      }
+    },LogLevel.Info)
 
     ctx.status = 200
     ctx.body = response
@@ -107,7 +114,14 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
 
     await next()
   } catch (err) {
-    console.error(err)
+    ctx.vtex.logger.log({
+      message: 'sendEmail Error',
+      detail: {
+        errorMessage: err.message,
+        error: err
+      }
+    },LogLevel.Error)
+    
     ctx.status = 500
     ctx.body = { error: 'Error sending email', message: err }
 
@@ -115,12 +129,8 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
   }
 }
 
-interface JsonDataCreated {
-  to: string
-  orders: unknown[]
-}
-interface JsonDataInvoiced {
-  clientProfileData: {
-    email: string
-  }
+interface EmailResponseSubs {
+  status: number
+  data: String
+  email: string | undefined
 }

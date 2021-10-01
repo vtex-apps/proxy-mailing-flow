@@ -1,5 +1,9 @@
-import { LogLevel, IOResponse } from '@vtex/api'
-import { BodyEmail, JsonData } from '../clients/email'
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable no-console */
+import type { IOResponse } from '@vtex/api'
+import { LogLevel } from '@vtex/api'
+
+import type { BodyEmail, JsonData } from '../clients/email'
 
 export async function sendEmail(ctx: Context, next: () => Promise<any>) {
   const {
@@ -45,28 +49,32 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
       })
     }
 
-    const emailBodySubscribersList: BodyEmail[] = subscribers.map((sub: string) => {
-      if (flow === 'Invoiced') {
-        const clientProfileDataSub = { ...orderResponse.clientProfileData }
-        const orderResponseSub = { ...orderResponse }
+    const emailBodySubscribersList: BodyEmail[] = subscribers.map(
+      (sub: string) => {
+        if (flow === 'Invoiced') {
+          const clientProfileDataSub = { ...orderResponse.clientProfileData }
+          const orderResponseSub = { ...orderResponse }
 
-        clientProfileDataSub.email = sub
-        orderResponseSub.clientProfileData = clientProfileDataSub
+          clientProfileDataSub.email = sub
+          orderResponseSub.clientProfileData = clientProfileDataSub
 
-        return emailBodyBuilder(
-          'noreply',
-          subscribersTemplateInvoiced,
-          orderResponseSub
-        )
+          return emailBodyBuilder(
+            'noreply',
+            subscribersTemplateInvoiced,
+            orderResponseSub
+          )
+        }
+
+        return emailBodyBuilder('noreply', subscribersTemplateCreated, {
+          to: sub,
+          orders: [orderResponse],
+        })
       }
+    )
 
-      return emailBodyBuilder('noreply', subscribersTemplateCreated, {
-        to: sub,
-        orders: [orderResponse],
-      })
-    })
-
-    const emailResponseClient: IOResponse<String> = await email.sendEmail(emailBodyClient)
+    const emailResponseClient: IOResponse<String> = await email.sendEmail(
+      emailBodyClient
+    )
 
     const emailResponseSubs: EmailResponseSubs[] = await Promise.all(
       emailBodySubscribersList.map(async (body: BodyEmail) => {
@@ -100,12 +108,18 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
       ],
     }
 
-    ctx.vtex.logger.log({
-      message: 'sendEmail Info',
-      detail: {
-        response: response
-      }
-    },LogLevel.Info)
+    ctx.vtex.logger.log(
+      {
+        message: 'sendEmail Info',
+        detail: {
+          response,
+        },
+      },
+      LogLevel.Info
+    )
+
+    console.log('orderId send email', response.orderId)
+    console.log('email operations', response.response)
 
     ctx.status = 200
     ctx.body = response
@@ -114,14 +128,17 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
 
     await next()
   } catch (err) {
-    ctx.vtex.logger.log({
-      message: 'sendEmail Error',
-      detail: {
-        errorMessage: err.message,
-        error: err
-      }
-    },LogLevel.Error)
-    
+    ctx.vtex.logger.log(
+      {
+        message: 'sendEmail Error',
+        detail: {
+          errorMessage: err.message,
+          error: err,
+        },
+      },
+      LogLevel.Error
+    )
+
     ctx.status = 500
     ctx.body = { error: 'Error sending email', message: err }
 

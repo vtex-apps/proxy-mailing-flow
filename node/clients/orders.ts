@@ -16,6 +16,7 @@ export default class OrdersClient extends ExternalClient {
     )
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   public async getOrder(orderId: string): Promise<IOResponse<String>> {
     return this.http.getRaw(`${orderId}`)
   }

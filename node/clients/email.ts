@@ -15,6 +15,7 @@ export default class Email extends ExternalClient {
     )
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   public async sendEmail(body: BodyEmail): Promise<IOResponse<String>> {
     return this.http.postRaw('', body)
   }

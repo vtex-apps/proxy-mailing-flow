@@ -63,8 +63,8 @@
     "title": "VTEX Proxy Mailing Flow",
     "type": "object",
     "properties": {
-      "clientEntity": {
-        "title": "Client MasterData Entity",
+      "defaultEmail": {
+        "title": "Default Email",
         "type": "string"
       },
       "subscriberEntityList": {

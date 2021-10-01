@@ -36,6 +36,7 @@ declare global {
     orderId: string
     clientProfileData: ClientProfileDataInterface
     customData: CustomDataInterface
+    marketingData: MarketingDataInterface
   }
   interface BodyInterface {
     State: string
@@ -44,6 +45,9 @@ declare global {
   }
   interface CustomDataInterface {
     customApps: [CustomFieldInterface]
+  }
+  interface MarketingDataInterface {
+    marketingTags: string[]
   }
   interface CustomFieldInterface {
     id: string

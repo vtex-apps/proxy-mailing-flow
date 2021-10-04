@@ -8,12 +8,17 @@ With this application you can customize the emails when the orders pass through 
 
 ## Settings fields
 There are 6 fields to complete for configure the app.
-1. Default email: is the email for mailing flows that doesn’t find any seller.
-2. Subscriber MasterData Entity List: here you can define one (at least) or more data entity acronyms for the subscribers to the mailing flow (example: seller and supervisor).
-3. Client Mailing Template Name (order-created): is the name of the message-center template url.
-4. Client Mailing Template Name (invoiced): is the name of the message-center template url.
-5. Subscribers Mailing Template Name (order-created): is the name of the message-center template url.
-6. Subscribers Mailing Template Name (invoiced): is the name of the message-center template url.
+- Default email: is the email for mailing flows that doesn’t find any seller.
+
+- Subscriber MasterData Entity List: here you can define one (at least) or more data entity acronyms for the subscribers to the mailing flow (example: seller and supervisor).
+
+- Client Mailing Template Name (order-created): is the name of the message-		center template url.
+
+- Client Mailing Template Name (invoiced): is the name of the message-center template url.
+
+- Subscribers Mailing Template Name (order-created): is the name of the message-center template url.
+
+- Subscribers Mailing Template Name (invoiced): is the name of the message-center template url.
 
 ![Settings fields](https://user-images.githubusercontent.com/55720621/135907990-74d3fd11-e2fb-4232-9a79-e26772f71dba.png)
 ## Steps by step:

@@ -28,4 +28,4 @@ There are 6 fields to complete for configure the app.
     >         "url": "https://{{accountName}}.myvtex.com/_v/proxy-mailing-flow/"
     >       }
     >     }
-4. Configure the settings fields of the app in the link `https://{{account}}.myvtex.com/admin/apps/vtexarg.proxy-mailing-flow/setup`.
+4. Configure the settings fields of the app in the link `https://{{account}}.myvtex.com/admin/apps/vtexarg.proxy-mailing-flow@3.x/setup`.

@@ -1,7 +1,7 @@
 {
   "name": "proxy-mailing-flow",
   "vendor": "vtexarg",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "title": "Proxy mailing Flow",
   "description": "Proxy that handle the mailing flow",
   "categories": [],

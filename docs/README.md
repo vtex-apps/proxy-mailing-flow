@@ -6,9 +6,18 @@ This service allows you to handling the mailing to be able to cancel and generat
 
 With this application you can customize the emails when the orders pass through the `order-created` and `invoiced` states. You also can skip notifications to the user when the order is created adding a custom app (in custom data) to the order, this custom app must have an `"id": "origin"`.
 
+## Settings fields
+There are 6 fields to complete for configure the app.
+1. Default email: is the email for mailing flows that doesn’t find any seller.
+2. Subscriber MasterData Entity List: here you can define one (at least) or more data entity acronyms for the subscribers to the mailing flow (example: seller and supervisor).
+3. Client Mailing Template Name (order-created): is the name of the message-center template url.
+4. Client Mailing Template Name (invoiced): is the name of the message-center template url.
+5. Subscribers Mailing Template Name (order-created): is the name of the message-center template url.
+6. Subscribers Mailing Template Name (invoiced): is the name of the message-center template url.
+![Settings fields](https://user-images.githubusercontent.com/55720621/135907990-74d3fd11-e2fb-4232-9a79-e26772f71dba.png)
 ## Steps by step:
 1. First you have to [**disable transactional emails**](https://help.vtex.com/en/tutorial/how-to-disable-a-transactional-email--frequentlyAskedQuestions_6715). 
-2. You need to install this app running `vtex install vtexarg.proxy-mailing-flow@2.x` command on the *vtex toolbelt*.
+2. You need to install this app running `vtex install vtexarg.proxy-mailing-flow@3.x` command on the *vtex toolbelt*.
 3. Then you must hook the order status changes to this service. You can see how to do this [**here**](https://developers.vtex.com/vtex-rest-api/reference/order-hook-1#hookconfiguration) (you need admin super roll). Here the body example:
     >     {
     >       "filter": {
@@ -19,4 +28,4 @@ With this application you can customize the emails when the orders pass through 
     >         "url": "https://{{accountName}}.myvtex.com/_v/proxy-mailing-flow/"
     >       }
     >     }
-4. Configure the settings of the app in the link
+4. Configure the settings fields of the app in the link `https://{{account}}.myvtex.com/admin/apps/vtexarg.proxy-mailing-flow/setup`.

@@ -7,26 +7,19 @@ import { getOrder } from './middlewares/getOrder'
 import { getClientData } from './middlewares/getClientData'
 import { pong } from './middlewares/pong'
 
-
 const TIMEOUT_MS = 800
 
-// Create a LRU memory cache for the Status client.
-// The @vtex/api HttpClient respects Cache-Control headers and uses the provided cache.
 const memoryCache = new LRUCache<string, any>({ max: 5000 })
 
 metrics.trackCache('status', memoryCache)
 
-// This is the configuration for clients available in `ctx.clients`.
 const clients: ClientsConfig<Clients> = {
-  // We pass our custom implementation of the clients bag, containing the Status client.
   implementation: Clients,
   options: {
-    // All IO Clients will be initialized with these options, unless otherwise specified.
     default: {
       retries: 2,
       timeout: TIMEOUT_MS,
     },
-    // This key will be merged with the default options and add this cache to our Status client.
     status: {
       memoryCache,
     },
@@ -34,49 +27,44 @@ const clients: ClientsConfig<Clients> = {
 }
 
 declare global {
-  // We declare a global Context type just to avoid re-writing ServiceContext<Clients, State> in every handler and resolver
   type Context = ServiceContext<Clients, State>
-
   interface ClientProfileDataInterface {
-    email: string,
+    email: string
     customerClass: string
   }
   interface OrderResponseInterface {
-    orderId: string,
-    clientProfileData: ClientProfileDataInterface,
+    orderId: string
+    clientProfileData: ClientProfileDataInterface
     customData: CustomDataInterface
+    marketingData: MarketingDataInterface
   }
   interface BodyInterface {
-    State: string,
-    OrderId: string,
+    State: string
+    OrderId: string
     hookConfig: string
   }
-
   interface CustomDataInterface {
     customApps: [CustomFieldInterface]
   }
-
+  interface MarketingDataInterface {
+    marketingTags: string[]
+  }
   interface CustomFieldInterface {
     id: string
   }
-  
-  // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
   interface State extends RecorderState {
-    code: number,
-    orderResponse: OrderResponseInterface,
-    body: BodyInterface,
-    emails: {clientEmail: string, sellerEmail: string},
+    orderResponse: OrderResponseInterface
+    body: BodyInterface
+    emails: { clientEmail: string; subsEmails: string[] }
     flow: string
   }
 }
 
-// Export a service that defines route handlers and client options.
 export default new Service({
   clients,
   routes: {
-    // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
     status: method({
-      POST: [pong, getOrder, getClientData,sendEmail],//1er: hacer un get order con el orderId, 2do: agarrar la info del 1ro y armar el body para pegarle a la api de mailing.
+      POST: [pong, getOrder, getClientData, sendEmail],
     }),
   },
 })

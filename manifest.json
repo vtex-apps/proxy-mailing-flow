@@ -1,7 +1,7 @@
 {
   "name": "proxy-mailing-flow",
   "vendor": "vtexarg",
-  "version": "2.1.1",
+  "version": "3.0.6",
   "title": "Proxy mailing Flow",
   "description": "Proxy that handle the mailing flow",
   "categories": [],
@@ -12,9 +12,7 @@
   },
   "billingOptions": {
     "type": "free",
-    "availableCountries": [
-      "*"
-    ]
+    "availableCountries": ["*"]
   },
   "scripts": {
     "prereleasy": "bash lint.sh"
@@ -61,5 +59,40 @@
       "name": "colossus-write-logs"
     }
   ],
+  "settingsSchema": {
+    "title": "VTEX Proxy Mailing Flow",
+    "type": "object",
+    "properties": {
+      "defaultEmail": {
+        "title": "Default Email",
+        "type": "string"
+      },
+      "subscriberEntityList": {
+        "title": "Suscriber MasterData Entity List",
+        "description": "Separated by commas (,)",
+        "type": "string"
+      },
+      "clientTemplateCreated": {
+        "title": "Client Mailing Template Name (order-created)",
+        "description": "The name at the end of the message-center template url.",
+        "type": "string"
+      },
+      "clientTemplateInvoiced": {
+        "title": "Client Mailing Template Name (invoiced)",
+        "description": "The name at the end of the message-center template url.",
+        "type": "string"
+      },
+      "subscribersTemplateCreated": {
+        "title": "Subscribers Mailing Template Name (order-created)",
+        "description": "The name at the end of the message-center template url.",
+        "type": "string"
+      },
+      "subscribersTemplateInvoiced": {
+        "title": "Subscribers Mailing Template Name (invoiced)",
+        "description": "The name at the end of the message-center template url.",
+        "type": "string"
+      }
+    }
+  },
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }

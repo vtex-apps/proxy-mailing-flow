@@ -1,100 +1,185 @@
-export async function sendEmail(ctx: Context, next: () => Promise<any>) { 
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable no-console */
+import type { IOResponse } from '@vtex/api'
+import { LogLevel } from '@vtex/api'
+
+import type { BodyEmail, JsonData } from '../clients/email'
+
+export async function sendEmail(ctx: Context, next: () => Promise<any>) {
   const {
     state: { orderResponse, emails, flow },
     clients: { email },
   } = ctx
 
+  ctx.vtex.logger.log(
+    {
+      message: 'sendEmail emails',
+      detail: {
+        emails,
+      },
+    },
+    LogLevel.Info
+  )
 
-  class EmailBodyCreated {
-    providerName: string;
-    templateName: string;
-    jsonData: {
-      to: string,
-      orders: [{}]
-    }
-    constructor(providerName: string, templateName: string, to: string, orders: [{}]){
-      this.providerName = providerName,
-      this.templateName = templateName,
-      this.jsonData = {
-          to: to,
-          orders: orders
+  ctx.vtex.logger.log(
+    {
+      message: 'sendEmail flow',
+      detail: {
+        flow,
+      },
+    },
+    LogLevel.Info
+  )
+
+  try {
+    const emailBodyBuilder = (
+      providerName: string,
+      templateName: string,
+      jsonData: JsonData
+    ) => {
+      return {
+        providerName,
+        templateName,
+        jsonData,
       }
     }
-  }
-  class EmailBodyInvoiced {
-    providerName: string;
-    templateName: string;
-    jsonData: {
-      clientProfileData : {
-        email: string
+
+    const appId = process.env.VTEX_APP_ID ? process.env.VTEX_APP_ID : ''
+    const {
+      clientTemplateCreated,
+      clientTemplateInvoiced,
+      subscribersTemplateCreated,
+      subscribersTemplateInvoiced,
+    } = await ctx.clients.apps.getAppSettings(appId)
+
+    const subscribers = emails.subsEmails
+
+    let emailBodyClient: BodyEmail
+
+    if (flow === 'Invoiced') {
+      emailBodyClient = emailBodyBuilder(
+        'noreply',
+        clientTemplateInvoiced,
+        orderResponse
+      )
+    } else {
+      emailBodyClient = emailBodyBuilder('noreply', clientTemplateCreated, {
+        to: emails.clientEmail,
+        orders: [orderResponse],
+      })
+    }
+
+    const emailBodySubscribersList: BodyEmail[] = subscribers.map(
+      (sub: string) => {
+        if (flow === 'Invoiced') {
+          const clientProfileDataSub = { ...orderResponse.clientProfileData }
+          const orderResponseSub = { ...orderResponse }
+
+          clientProfileDataSub.email = sub
+          orderResponseSub.clientProfileData = clientProfileDataSub
+
+          return emailBodyBuilder(
+            'noreply',
+            subscribersTemplateInvoiced,
+            orderResponseSub
+          )
+        }
+
+        return emailBodyBuilder('noreply', subscribersTemplateCreated, {
+          to: sub,
+          orders: [orderResponse],
+        })
       }
+    )
+
+    const emailResponseClient: IOResponse<String> = await email.sendEmail(
+      emailBodyClient
+    )
+
+    const emailResponseSubs: EmailResponseSubs[] = await Promise.all(
+      emailBodySubscribersList.map(async (body: BodyEmail) => {
+        const aux = await email.sendEmail(body)
+
+        ctx.vtex.logger.log(
+          {
+            message: 'sendEmail aux email.sendEmail',
+            detail: {
+              response: aux,
+            },
+          },
+          LogLevel.Info
+        )
+
+        if (flow === 'Invoiced') {
+          return {
+            status: aux.status,
+            data: aux.data,
+            email: body?.jsonData?.clientProfileData?.email,
+          }
+        }
+
+        return {
+          status: aux.status,
+          data: aux.data,
+          email: body?.jsonData?.to,
+        }
+      })
+    )
+
+    const response = {
+      orderId: orderResponse.orderId,
+      response: [
+        ...emailResponseSubs,
+        {
+          status: emailResponseClient.status,
+          data: emailResponseClient.data,
+          email: emails.clientEmail,
+        },
+      ],
     }
-    constructor(providerName: string, templateName: string, orders: {clientProfileData : {email: string}}){
-      this.providerName = providerName,
-      this.templateName = templateName,
-      this.jsonData = orders
-    }
-  }
 
-  if(flow === "Invoiced"){
-    console.log(ctx.state.flow)
-    const templateInvoicedClient = "proxymailingoms-pedido-facturado"
-    const templateInvoicedSeller = "proxymailingoms-pedido-facturado-vendedor"
-    
-    
-    // 1 ---------------------------------------------------------------------------------------
-    console.log("EMAIL DEL COMERCIANTE 1-------------",orderResponse.clientProfileData.email)
-    
-    // 2 ---------------------------------------------------------------------------------------
-    const clientProfileDataSeller = {...orderResponse.clientProfileData}
-    const orderResponseSeller = {...orderResponse}
-    clientProfileDataSeller.email = emails.sellerEmail 
-    orderResponseSeller.clientProfileData = clientProfileDataSeller
-  
-    // 3 ---------------------------------------------------------------------------------------
-    console.log("EMAIL DEL COMERCIANTE 3-------------",orderResponse.clientProfileData.email)
+    ctx.vtex.logger.log(
+      {
+        message: 'sendEmail Info',
+        detail: {
+          response: response,
+        },
+      },
+      LogLevel.Info
+    )
 
-    const emailBodyClient = new EmailBodyInvoiced("noreply", templateInvoicedClient,  orderResponse)
-    const emailBodySeller = new EmailBodyInvoiced("noreply", templateInvoicedSeller, orderResponseSeller)
-    
-    //TODO: VERIFICAR SI LOS MAILS SON CORRECTOS
-    console.log("CPD CLIENT---------------------------",emailBodyClient.jsonData.clientProfileData)
-    console.log("CPD SELLER---------------------------",emailBodySeller.jsonData.clientProfileData)
-    
-    console.log("SEND EMAIL SELLER TO:",emailBodySeller.jsonData.clientProfileData.email)
-    console.log("SEND EMAIL CLIENT TO:",emailBodyClient.jsonData.clientProfileData.email)
-    const emailResponseClient: any = await email.sendEmail(emailBodyClient)
-    const emailResponseSeller: any = await email.sendEmail(emailBodySeller)
+    console.log('orderId send email', response.orderId)
+    console.log('email operations', response.response)
 
-    console.info('Email Response:', emailResponseClient, emailResponseSeller)
-  
-    ctx.status = 200//responseStatus
-    ctx.body = { "response": "Email sent " + emailResponseClient + " " + emailResponseSeller}
-    
-    ctx.state.flow = "EmailSent-Invoiced"
-    console.log(ctx.state.flow)
+    ctx.status = 200
+    ctx.body = response
+    ctx.state.flow =
+      flow === 'Invoiced' ? 'EmailSent-Invoiced' : 'EmailSent-Created'
+
     await next()
-  } else if (flow === "OrderCreatedWithoutOrigin"){
-    console.log(ctx.state.flow)
-    const emailBodyClient = new EmailBodyCreated("noreply", "proxymailingoms-pedido-recibido", emails.clientEmail, [orderResponse])
-    const emailBodySeller = new EmailBodyCreated("noreply", "proxymailingoms-pedido-pendiente-aprobacion", emails.sellerEmail, [orderResponse])
-    
-    const emailResponseClient: any = await email.sendEmail(emailBodyClient)
-    const emailResponseSeller: any = await email.sendEmail(emailBodySeller)
-    
-    console.info('Email Response:', emailResponseClient, emailResponseSeller)
-  
-    ctx.status = 200//responseStatus
-    ctx.body = { "response": "Email sent " + emailResponseClient + " " + emailResponseSeller}
-    
-    ctx.state.flow = "EmailSent-Created"
-    console.log(ctx.state.flow)
-    await next()
-  } else {
-    ctx.state.flow = "No Invoiced or OrderCreatedWithoutOrigin => No Email"
-    console.log(ctx.state.flow)
+  } catch (err) {
+    ctx.vtex.logger.log(
+      {
+        message: 'sendEmail Error',
+        detail: {
+          emails: emails,
+          order: orderResponse,
+          errorMessage: err.message,
+          error: err,
+        },
+      },
+      LogLevel.Error
+    )
 
-    return
+    ctx.status = 500
+    ctx.body = { error: 'Error sending email', message: err }
+
+    await next()
   }
-  
+}
+
+interface EmailResponseSubs {
+  status: number
+  data: String
+  email: string | undefined
 }

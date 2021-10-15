@@ -11,6 +11,26 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
     clients: { email },
   } = ctx
 
+  ctx.vtex.logger.log(
+    {
+      message: 'sendEmail emails',
+      detail: {
+        emails,
+      },
+    },
+    LogLevel.Info
+  )
+
+  ctx.vtex.logger.log(
+    {
+      message: 'sendEmail flow',
+      detail: {
+        flow,
+      },
+    },
+    LogLevel.Info
+  )
+
   try {
     const emailBodyBuilder = (
       providerName: string,
@@ -80,6 +100,16 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
       emailBodySubscribersList.map(async (body: BodyEmail) => {
         const aux = await email.sendEmail(body)
 
+        ctx.vtex.logger.log(
+          {
+            message: 'sendEmail aux email.sendEmail',
+            detail: {
+              response: aux,
+            },
+          },
+          LogLevel.Info
+        )
+
         if (flow === 'Invoiced') {
           return {
             status: aux.status,
@@ -112,7 +142,7 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
       {
         message: 'sendEmail Info',
         detail: {
-          response,
+          response: response,
         },
       },
       LogLevel.Info
@@ -132,6 +162,8 @@ export async function sendEmail(ctx: Context, next: () => Promise<any>) {
       {
         message: 'sendEmail Error',
         detail: {
+          emails: emails,
+          order: orderResponse,
           errorMessage: err.message,
           error: err,
         },

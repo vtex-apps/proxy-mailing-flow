@@ -25,14 +25,34 @@ export async function getClientData(ctx: Context, next: () => Promise<any>) {
 
         console.log('customerClassTag', customerClassTag)
 
+        ctx.vtex.logger.log(
+          {
+            message: 'customerClassTag',
+            detail: {
+              customerClassTag: customerClassTag
+            },
+          },
+          LogLevel.Info
+        )
+
         if (!customerClassTag) {
           return masterdataclient.getClientData(customerClass, sub)
         }
 
         // eslint-disable-next-line prefer-destructuring
-        const ccFromMarketingTags = customerClassTag.split('-')[1]
+        const ccFromMarketingTags = customerClassTag.split('customerClass-')[1]
 
         console.log('ccFromMarketingTags', ccFromMarketingTags)
+
+        ctx.vtex.logger.log(
+          {
+            message: 'ccFromMarketingTags',
+            detail: {
+              ccFromMarketingTags: ccFromMarketingTags
+            },
+          },
+          LogLevel.Info
+        )
 
         return masterdataclient.getClientData(ccFromMarketingTags, sub)
       })

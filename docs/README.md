@@ -20,6 +20,8 @@ There are 6 fields to complete for configure the app.
 
 - Subscribers Mailing Template Name (invoiced): is the name of the message-center template url.
 
+You can see how to modify the templates [**here**](https://developers.vtex.com/vtex-rest-api/docs/how-to-set-up-functions-in-the-message-center-templates)
+
 ![Settings fields](https://user-images.githubusercontent.com/55720621/135907990-74d3fd11-e2fb-4232-9a79-e26772f71dba.png)
 ## Steps by step:
 1. First you have to [**disable transactional emails**](https://help.vtex.com/en/tutorial/how-to-disable-a-transactional-email--frequentlyAskedQuestions_6715). 
